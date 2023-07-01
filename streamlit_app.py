@@ -5,7 +5,8 @@ import numpy as np
 import plotly.figure_factory as ff
 import matplotlib.pyplot as plt
 
-
+import stlib
+import importlib
 
 @st.cache_data
 def load_data_info():
@@ -52,6 +53,9 @@ def main():
     # Chargement des données de base
     infos_client = load_data_info()
     
+    # Chargement du gros dataset
+    dataset = load_dataset(50000)
+    
     # Création de la sidebar
     st.sidebar.title("Infos client")
     
@@ -61,51 +65,30 @@ def main():
     
     st.sidebar.divider()
     
+    # Si l'id client a un soucis on stop tout là
     if sk_id is None:
         st.stop()
     
     
-    # Chargement du gros dataset
-    dataset = load_dataset(50000)
-    # Création du masque utile pour les graphs
-    mask_t0 = (dataset['TARGET'] == 0)
     
     # Chargement de la ligne du client
     client_line = get_client_line(dataset, sk_id)
-    # Affichage
-    st.text(client_line)
     
-    
-    
-    
-    # Création du module d'un graphique
-    col1, col2 = st.columns([2, 1])
+    # Chargement des autres pages sous forme de modules
+    moduleNames = ['simple','complexe']
+    pages = {}
 
-    # Calcul et création du graphique
-    to_plot = [dataset.loc[mask_t0, 'AMT_INCOME_TOTAL'], dataset.loc[~mask_t0, 'AMT_INCOME_TOTAL']]
-
-    fig, ax = plt.subplots()
-    ax.hist(to_plot, bins=50, label=["Accepté", "Refusé"], density=True, log=True)
-    ax.axvline(x=client_line['AMT_INCOME_TOTAL'], color='r', linestyle='--', label='Client')
-    ax.legend()
+    # Charge chaque librairie
+    for modname in moduleNames:
+        m = importlib.import_module('.'+modname,'stlib')
+        pages[modname] = m
     
-    # Ajout du graphique au module
-    col1.subheader("Visualisation de AMT_INCOME_TOTAL")
-    col1.pyplot(fig)
-
-    col2.write(
-    """<style>
-    [data-testid="stHorizontalBlock"] {
-        align-items: center;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True)
-    col2.markdown("### Importance : :green[faible]")
-    col2.markdown("### Effet : :red[negatif] :-1:")
-    col2.markdown("### Comment améliorer : Augmenter :arrow_up: :point_up_2: :chart_with_upwards_trend:")
-    col2.container()
+    # Affiche le menu de sélection de page
+    with st.sidebar:
+        page = st.selectbox("Mode d'analyse:", pages.keys(), format_func=lambda k:pages[k].description) 
     
+    # Lance la page sélectionnée
+    pages[page].run(dataset, client_line)
     
 
 if __name__ == '__main__':
