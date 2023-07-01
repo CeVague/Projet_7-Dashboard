@@ -10,12 +10,12 @@ import importlib
 
 @st.cache_data
 def load_data_info():
-    df = pd.read_pickle("C:/Users/Administrateur/Documents/OpenClassrooms/GitHub/Projet_7-Dashboard/data/client_info.pkl")
+    df = pd.read_pickle("./data/client_info.pkl")
     return df
 
 @st.cache_data
 def load_dataset(sample=None):
-    df = pd.read_pickle("C:/Users/Administrateur/Documents/OpenClassrooms/GitHub/Projet_7-Dashboard/data/streamlit_dataset.pkl")
+    df = pd.read_pickle("./data/streamlit_dataset.pkl")
     if sample is None:
         return df
     else:
