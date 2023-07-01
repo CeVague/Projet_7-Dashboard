@@ -28,17 +28,17 @@ def get_client_line(df, sk_id):
 
 def show_client(df, sk_id, show):
     if sk_id=="":
-        st.stop()
+        return None
     
     if not sk_id.isdigit():
         show.write('ID client doit être un entier')
-        st.stop()
+        return None
     
     sk_id = int(sk_id)
     
     if len(df.loc[df['SK_ID_CURR']==sk_id]) == 0:
         show.write('ID client introuvable')
-        st.stop()
+        return None
     
     client_line = get_client_line(df, sk_id)
     show.write('Genre : ' + ('Homme' if client_line['CODE_GENDER']==0 else 'Femme'))
@@ -61,7 +61,8 @@ def main():
     
     st.sidebar.divider()
     
-    
+    if sk_id is None:
+        st.stop()
     
     
     # Chargement du gros dataset
