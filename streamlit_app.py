@@ -22,10 +22,27 @@ def load_dataset(sample=None):
         #return df.sample(sample)
         return df.iloc[:sample]
 
+
+# Je ne peux pas les mettres dans le main sinon
+# le dataset n'est accessible qu'en le donnant en
+# parametres aux fonctions. Or Streamlit le gère
+# mal et met longtemps à relancer get_client_line
+
+#Mise en forme de la page
+st.set_page_config(page_title="Analyse du statut client", layout="wide")
+
+# Chargement du gros dataset
+dataset = load_dataset()
+
+# Chargement des données de base
+infos_client = load_data_info()
+    
+    
 @st.cache_data
-def get_client_line(df, sk_id):
-    index = df.SK_ID_CURR.eq(sk_id).argmax()
-    return df.iloc[index]
+def get_client_line(sk_id):
+    index = dataset.SK_ID_CURR.eq(sk_id).argmax()
+    return dataset.iloc[index]
+
 
 def show_client(df, sk_id, show):
     if sk_id=="":
@@ -41,21 +58,14 @@ def show_client(df, sk_id, show):
         show.write('ID client introuvable')
         return None
     
-    client_line = get_client_line(df, sk_id)
+    client_line = get_client_line(sk_id)
     show.write('Genre : ' + ('Homme' if client_line['CODE_GENDER']==0 else 'Femme'))
     show.write('Type de prêt : ' + ('Comptant' if client_line['NAME_CONTRACT_TYPE']==0 else 'Renouvelable'))
+    show.markdown("Statut : " + (":green[Accepté]"if client_line['TARGET']==0 else ':red[Refusé]'))
     return sk_id
 
+    
 def main():
-    #Mise en forme de la page
-    st.set_page_config(page_title="Analyse du statut client", layout="wide")
-    
-    # Chargement des données de base
-    infos_client = load_data_info()
-    
-    # Chargement du gros dataset
-    dataset = load_dataset(50000)
-    
     # Création de la sidebar
     st.sidebar.title("Infos client")
     
@@ -72,7 +82,7 @@ def main():
     
     
     # Chargement de la ligne du client
-    client_line = get_client_line(dataset, sk_id)
+    client_line = get_client_line(sk_id)
     
     # Chargement des autres pages sous forme de modules
     moduleNames = ['simple','complexe']
