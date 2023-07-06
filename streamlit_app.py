@@ -12,6 +12,8 @@ import os
 
 from stlib import simple, complexe
 
+import requests
+
 # Chargement des variables en fonction de l'environnement
 if os.environ.get('ENVIRONMENT') == 'local':
     load_dotenv('config_local.env')
@@ -59,23 +61,18 @@ def get_client_line(sk_id):
 
 @st.cache_data
 def get_client_shap(client_line):
-    with open('./data/explainer.pkl', 'rb') as f:
-        explainer = pickle.load(f)
-    with open('./data/scaler.pkl', 'rb') as f:
-        scaler = pickle.load(f)
-    with open('./data/model.pkl', 'rb') as f:
-        model = pickle.load(f)
-    with open('./data/columns.pkl', 'rb') as f:
-        columns = pickle.load(f)
+    reponse = requests.get(API_URL, json={'data': client_line.to_json(default_handler=str)})
     
-    client_line_scaled = scaler.transform([client_line[list(columns)]])
-    client_line_explained = explainer(client_line_scaled)
-    
-    tmp = pd.DataFrame(client_line_explained.values, columns=columns, index=['shap']).T
-    tmp['abs'] = tmp['shap'].abs()
-    tmp = tmp.sort_values('abs', ascending=False)
-    
-    return tmp
+    # Vérifier la réponse du serveur
+    if reponse.status_code == 200:
+        # Récupérer le DataFrame depuis la réponse JSON
+        json_reponse = reponse.json()
+        df_reponse = pd.DataFrame.from_dict(json_reponse)
+
+        # Faire quelque chose avec le DataFrame de réponse
+        return df_reponse
+    else:
+        return "Erreur lors de l'envoi des données"
 
 def show_client(df, sk_id, show):
     if sk_id=="":
@@ -139,7 +136,7 @@ def main():
         page = st.selectbox("Mode d'analyse:", pages.keys(), format_func=lambda k:pages[k].description) 
     
     # Lance la page sélectionnée
-    pages[page].run(dataset, client_line)
+    pages[page].run(dataset, client_line, shap_tmp)
     
 
 if __name__ == '__main__':
