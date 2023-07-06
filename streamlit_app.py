@@ -10,8 +10,7 @@ import pickle
 from dotenv import load_dotenv
 import os
 
-import simple
-import complexe
+from stlib import simple, complexe
 
 # Chargement des variables en fonction de l'environnement
 if os.environ.get('ENVIRONMENT') == 'local':
@@ -140,7 +139,7 @@ def main():
         page = st.selectbox("Mode d'analyse:", pages.keys(), format_func=lambda k:pages[k].description) 
     
     # Lance la page sélectionnée
-    pages[page].run(dataset, client_line, shap_tmp)
+    pages[page].run(dataset, client_line)
     
 
 if __name__ == '__main__':
