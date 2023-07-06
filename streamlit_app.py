@@ -8,14 +8,29 @@ import matplotlib.pyplot as plt
 import stlib
 import importlib
 
+import pickle
+
+from dotenv import load_dotenv
+import os
+
+# Charger les variables d'environnement en fonction de l'environnement
+if os.environ.get('ENVIRONMENT') == 'local':
+    load_dotenv('config_local.env')
+else:
+    load_dotenv('config_production.env')
+
+API_URL = os.environ.get('API_URL')
+CLIENT_INFO_FILE = os.environ.get('CLIENT_INFO_FILE')
+DATASET = os.environ.get('DATASET')
+
 @st.cache_data
 def load_data_info():
-    df = pd.read_pickle("./data/client_info.pkl")
+    df = pd.read_pickle(CLIENT_INFO_FILE)
     return df
 
 @st.cache_data
 def load_dataset(sample=None):
-    df = pd.read_pickle("./data/streamlit_dataset.pkl")
+    df = pd.read_pickle(DATASET)
     if sample is None:
         return df
     else:
@@ -43,6 +58,25 @@ def get_client_line(sk_id):
     index = dataset.SK_ID_CURR.eq(sk_id).argmax()
     return dataset.iloc[index]
 
+@st.cache_data
+def get_client_shap(client_line):
+    with open('./data/explainer.pkl', 'rb') as f:
+        explainer = pickle.load(f)
+    with open('./data/scaler.pkl', 'rb') as f:
+        scaler = pickle.load(f)
+    with open('./data/model.pkl', 'rb') as f:
+        model = pickle.load(f)
+    with open('./data/columns.pkl', 'rb') as f:
+        columns = pickle.load(f)
+    
+    client_line_scaled = scaler.transform([client_line[list(columns)]])
+    client_line_explained = explainer(client_line_scaled)
+    
+    tmp = pd.DataFrame(client_line_explained.values, columns=columns, index=['shap']).T
+    tmp['abs'] = tmp['shap'].abs()
+    tmp = tmp.sort_values('abs', ascending=False)
+    
+    return tmp
 
 def show_client(df, sk_id, show):
     if sk_id=="":
@@ -66,6 +100,10 @@ def show_client(df, sk_id, show):
 
     
 def main():
+    st.sidebar.write(os.environ.get('API_URL'))
+    st.sidebar.write(os.environ.get('CLIENT_INFO_FILE'))
+    st.sidebar.write(os.environ.get('DATASET'))
+    
     # Création de la sidebar
     st.sidebar.title("Infos client")
     
@@ -83,6 +121,16 @@ def main():
     
     # Chargement de la ligne du client
     client_line = get_client_line(sk_id)
+    
+    
+    
+    # -------------tests--------------------
+    shap_tmp = get_client_shap(client_line)
+    st.write(shap_tmp)
+    
+    
+    
+    
     
     # Chargement des autres pages sous forme de modules
     moduleNames = ['simple','complexe']

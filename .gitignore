@@ -129,4 +129,5 @@ dmypy.json
 .pyre/
 
 
-data/
+data/streamlit_dataset.pkl
+data/client_info.pkl
