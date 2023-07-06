@@ -5,7 +5,6 @@ plotly
 matplotlib
 stlib
 importlib
-dotenv
+python-dotenv
 scikit-learn
-pickle
 shap
