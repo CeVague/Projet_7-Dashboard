@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'os-python-dashboard-streamlit-aaa'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_FD566D5B92A047A6833E026195D846D5 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6A4EBB454636454BA221CA8D3FD0471C }}
