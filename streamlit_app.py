@@ -5,15 +5,15 @@ import numpy as np
 import plotly.figure_factory as ff
 import matplotlib.pyplot as plt
 
-import stlib
-import importlib
-
 import pickle
 
 from dotenv import load_dotenv
 import os
 
-# Charger les variables d'environnement en fonction de l'environnement
+import simple
+import complexe
+
+# Chargement des variables en fonction de l'environnement
 if os.environ.get('ENVIRONMENT') == 'local':
     load_dotenv('config_local.env')
 else:
@@ -133,20 +133,14 @@ def main():
     
     
     # Chargement des autres pages sous forme de modules
-    moduleNames = ['simple','complexe']
-    pages = {}
-
-    # Charge chaque librairie
-    for modname in moduleNames:
-        m = importlib.import_module('.'+modname,'stlib')
-        pages[modname] = m
+    pages = {'simple':simple,'complexe':complexe}
     
     # Affiche le menu de sélection de page
     with st.sidebar:
         page = st.selectbox("Mode d'analyse:", pages.keys(), format_func=lambda k:pages[k].description) 
     
     # Lance la page sélectionnée
-    pages[page].run(dataset, client_line)
+    pages[page].run(dataset, client_line, shap_tmp)
     
 
 if __name__ == '__main__':

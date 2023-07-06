@@ -1,9 +1,9 @@
-importlib
 matplotlib
 numpy
 pandas
 plotly
 python-dotenv
 scikit-learn
+setuptools
 streamlit
 shap
