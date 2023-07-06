@@ -1,10 +1,9 @@
-streamlit
-pandas
-numpy
-plotly
-matplotlib
-stlib
 importlib
+matplotlib
+numpy
+pandas
+plotly
 python-dotenv
 scikit-learn
+streamlit
 shap
