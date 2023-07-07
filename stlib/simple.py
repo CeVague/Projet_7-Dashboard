@@ -14,6 +14,8 @@ def run(dataset, client_line, shap_df, shap_img):
     
     mask_t0 = get_mask()
     
+    st.write(dataset.loc[~mask_t0, 'SK_ID_CURR'])
+    
     COLOR_A = '#008bfb'
     COLOR_R = '#ff0051'
     
@@ -22,7 +24,32 @@ def run(dataset, client_line, shap_df, shap_img):
         fig, ax = plt.subplots()
         to_plot = [dataset.loc[mask_t0, name_col].dropna(), dataset.loc[~mask_t0, name_col].dropna()]
         skip_legend=False
-        if name_col == 'AMT_CREDIT_r_AMT_INCOME_TOTAL':
+        if name_col == 'ACTIVE_AMT_CREDIT_SUM_LIMIT_SUM' or name_col == 'AMT_CREDIT__AMT_GOODS_PRICE' :
+            if name_col == 'ACTIVE_AMT_CREDIT_SUM_LIMIT_SUM':
+                i = name_col.rfind('_')
+                start = name_col[:i+1]
+                end = name_col[i:]
+
+                col1 = name_col[:len(start)]+"SUM"
+                col2 = name_col[:len(start)]+"MEAN"
+            else:
+                col1 = 'AMT_CREDIT'
+                col2 = 'AMT_GOODS_PRICE'
+                
+            
+            ax.scatter(dataset.loc[mask_t0, col1], dataset.loc[mask_t0, col2], s=1, c='g', label="Accepté") 
+            ax.scatter(dataset.loc[~mask_t0, col1], dataset.loc[~mask_t0, col2], s=1, c='r', label="Refusé")
+            
+            ax.scatter(x=client_line[col1], y=client_line[col2], color='black', label='Client')
+            
+            ax.set_yscale('log')
+            ax.set_xscale('log')
+            
+            
+            ax.legend()
+            
+            skip_legend=True
+        elif name_col == 'AMT_CREDIT_r_AMT_INCOME_TOTAL':
             ax.hist(to_plot, bins=50, range=(0, 20), label=["Accepté", "Refusé"], color=[COLOR_A, COLOR_R], density=True, log=False, histtype='bar', stacked=True, fill=True)
         elif dtype == 'cat_0':
             ax.hist(to_plot, bins=len(to_plot[0].unique())-1, label=["Accepté", "Refusé"], color=[COLOR_A, COLOR_R], density=True, log=True, align='left')
@@ -73,17 +100,21 @@ def run(dataset, client_line, shap_df, shap_img):
         if name_col in shap_df.index:
             return shap_df.loc[name_col, 'shap']
         else:
+            val = str(val)
             cols = list(shap_df.index)
             i = name_col.rfind('_')
             start = name_col[:i+1]
             end = name_col[i:]
             
-            name_col = start+str(val)+end
-            
             cols = [c for c in cols if c.startswith(start) and c.endswith(end)]
-            cols.remove(name_col)
             
-            return shap_df.loc[name_col, 'shap'] - shap_df.loc[cols, 'shap'].mean()
+            if val != 'nan':
+                name_col = start+val+end
+                cols.remove(name_col)
+            
+                return shap_df.loc[name_col, 'shap'] - shap_df.loc[cols, 'shap'].mean()
+            else:
+                return shap_df.loc[cols, 'shap'].mean()
             
     
     # Affichage
@@ -102,6 +133,8 @@ def run(dataset, client_line, shap_df, shap_img):
     st.header("Visualisation individuelle des features")
     
     traduction = {
+        'ACTIVE_AMT_CREDIT_SUM_LIMIT_SUM':"lkjlklklk",
+        'AMT_CREDIT__AMT_GOODS_PRICE':"lkjlklklk",
         'EXT_SOURCE_MEAN': 'Moyenne des scores normalisés de 3 sources externes',
         'AMT_CREDIT_r_AMT_INCOME_TOTAL': 'Ratio entre le cout du crédit et les revenus du client',
         'PREV_NAME_SELLER_INDUSTRY_MEDIAN': 'Domaine d\'industrie le plus fréquent des précédents vendeurs',
@@ -117,6 +150,8 @@ def run(dataset, client_line, shap_df, shap_img):
                             ('PREV_NAME_SELLER_INDUSTRY_MEDIAN', 'cat_0'),
                             ('FLAG_PHONE', 'cat_1'),
                             ('DAYS_BIRTH', None),
+                            ('ACTIVE_AMT_CREDIT_SUM_LIMIT_SUM', None),
+                            ('AMT_CREDIT__AMT_GOODS_PRICE', None),
                            ]:
     
         # Création du module d'un graphique
