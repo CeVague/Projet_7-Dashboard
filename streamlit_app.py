@@ -12,7 +12,7 @@ import os
 import io
 from PIL import Image
 
-from stlib import simple, complexe
+from stlib import edit_client, resume, personalised_graph
 
 import requests
 
@@ -178,7 +178,7 @@ def main():
     
     
     # Chargement des autres pages sous forme de modules
-    pages = {'simple':simple,'complexe':complexe}
+    pages = {'resume':resume, 'edit_client':edit_client, 'personalised_graph':personalised_graph}
     
     # Affiche le menu de sélection de page
     with st.sidebar:
