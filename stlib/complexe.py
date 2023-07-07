@@ -5,10 +5,29 @@ def run(dataset, client_line, shap_df, shap_img):
     import pandas as pd
     import plotly.express as px
     import matplotlib.pyplot as plt
+    import os
+    
+    import requests
+    
+    
+    API_PREDICT_URL = os.environ.get('API_PREDICT_URL')
     
     @st.cache_data
     def get_mask():
         return dataset['TARGET'] == 0
+    
+    @st.cache_data
+    def predict_client(client_line):
+        reponse = requests.get(API_PREDICT_URL, json={'data': client_line.to_json(default_handler=str)})
+
+        # Vérifier la réponse du serveur
+        if reponse.status_code == 200:
+            # Récupérer le DataFrame depuis la réponse JSON
+            json_reponse = reponse.json()
+
+            return json_reponse
+        else:
+            st.error('Erreur lors de la prédiction')
     
     mask_t0 = get_mask()
     
@@ -26,9 +45,9 @@ def run(dataset, client_line, shap_df, shap_img):
         st.image(shap_img, caption="Liste des features ayant eu le plus d'influence sur le choix final de l'algorythme, ainsi que si l'effet est positif ou négatif")
     
     
-    tab1, tab2 = st.tabs(["Visualisation", "Modification"])
+    tab1, tab2 = st.tabs(["Modification", "Visualisation"])
     
-    with tab1:
+    with tab2:
         st.header("Visualisation individuelle des features")
 
         form = st.form("select_columns", clear_on_submit=False)
@@ -51,9 +70,27 @@ def run(dataset, client_line, shap_df, shap_img):
             dataset[[feat_1, feat_2]].dropna().plot()
         st.pyplot()
         
-    with tab2:
-        print(client_line)
-        edited_df = st.data_editor(client_line)
+    with tab1:
+        old_score = predict_client(client_line.squeeze())['result_proba']
+        option = st.selectbox("Feature à modifier", client_line.index)
+        old_value = client_line[option]
+        st.text('Valeur actuelle : '+str(old_value))
+        if type(old_value) == type(0.01):
+            value = st.number_input('Valeur à lui donner')
+        else:
+            value = st.text_input('Valeur à lui donner')
+        #edited_client_line = st.data_editor(client_line.to_frame())
+        
+        if st.button('Modifier'):
+            edited_client_line = client_line.copy()
+            edited_client_line[option] = eval(value)
+        else:
+            edited_client_line = client_line.copy()
+        
+        statut = predict_client(edited_client_line.squeeze())
+        st.markdown("# Statut predit : " + (":green[Accepté]"if statut['result']==0 else ':red[Refusé]'))
+        st.text("Ancien score brut : " + str(old_score))
+        st.text("Nouveau score brut : " + str(statut['result_proba']))
 
         #favorite_command = edited_df.loc[edited_df["rating"].idxmax()]["command"]
         #st.markdown(f"Your favorite command is **{favorite_command}** 🎈")

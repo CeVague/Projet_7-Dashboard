@@ -24,6 +24,7 @@ else:
 
 API_DATAFRAME_URL = os.environ.get('API_DATAFRAME_URL')
 API_PLOT_URL = os.environ.get('API_PLOT_URL')
+API_PREDICT_URL = os.environ.get('API_PREDICT_URL')
 CLIENT_INFO_FILE = os.environ.get('CLIENT_INFO_FILE')
 DATASET = os.environ.get('DATASET')
 
@@ -61,6 +62,20 @@ infos_client = load_data_info()
 def get_client_line(sk_id):
     index = dataset.SK_ID_CURR.eq(sk_id).argmax()
     return dataset.iloc[index]
+
+
+@st.cache_data
+def predict_client(client_line):
+    reponse = requests.get(API_PREDICT_URL, json={'data': client_line.to_json(default_handler=str)})
+    
+    # Vérifier la réponse du serveur
+    if reponse.status_code == 200:
+        # Récupérer le DataFrame depuis la réponse JSON
+        json_reponse = reponse.json()
+        
+        return json_reponse
+    else:
+        st.error('Erreur lors de la prédiction')
 
 @st.cache_data
 def get_client_shap(client_line):
@@ -118,9 +133,9 @@ def show_client(df, sk_id, show):
     show.write('Genre : ' + genre)
     show.write('Type de prêt : ' + ('Comptant' if client_line['NAME_CONTRACT_TYPE']==0 else 'Renouvelable'))
     
-    show.divider()
-    
-    show.markdown("# Statut : " + (":green[Accepté]"if client_line['TARGET']==0 else ':red[Refusé]'))
+    statut = predict_client(client_line)['result']
+    show.markdown("Statut : " + (":green[Accepté]"if client_line['TARGET']==0 else ':red[Refusé]'))
+    show.markdown("# Statut predit : " + (":green[Accepté]"if statut==0 else ':red[Refusé]'))
     return sk_id
 
     
