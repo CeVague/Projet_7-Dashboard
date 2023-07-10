@@ -8,18 +8,21 @@ def run(dataset, client_line, shap_df, shap_img):
     import matplotlib.pyplot as plt
     from matplotlib.lines import Line2D
     
+    # Palette de couleur
+    COLOR_A = '#008bfb' # Accepté
+    COLOR_R = '#ff0051' # Refusé
+    COLOR_C = '#000000' # Client
+    
+    # Création du masque pour séléctionner les 
+    # clients acceptés du dataset
     @st.cache_data
     def get_mask():
         return dataset['TARGET'] == 0
     
     mask_t0 = get_mask()
     
-    st.write(dataset.loc[~mask_t0, 'SK_ID_CURR'])
-    
-    COLOR_A = '#008bfb'
-    COLOR_R = '#ff0051'
-    
-    #@st.cache_resource
+    # Fonction de génération du graphique selon la colonne et le type de données
+    # C'est le graphique dans la partie gauche
     def get_fig(name_col, dtype=None):
         fig, ax = plt.subplots()
         to_plot = [dataset.loc[mask_t0, name_col].dropna(), dataset.loc[~mask_t0, name_col].dropna()]
@@ -95,13 +98,17 @@ def run(dataset, client_line, shap_df, shap_img):
         
         return fig, ax
     
-    #@st.cache_data
+    # Récupération de l'influence de cette feature donnée par SHAP
     def get_importance(name_col, val):
+        # Récupération si c'est une features étudiée par SHAP
         if name_col in shap_df.index:
             return shap_df.loc[name_col, 'shap']
+        # Récupération si c'est une variable catégorielle
         else:
             val = str(val)
             cols = list(shap_df.index)
+            
+            # Récupération d
             i = name_col.rfind('_')
             start = name_col[:i+1]
             end = name_col[i:]
@@ -117,22 +124,23 @@ def run(dataset, client_line, shap_df, shap_img):
                 return shap_df.loc[cols, 'shap'].mean()
             
     
-    # Affichage
+    # Présentation de la page
     st.title(description)
     
-    st.markdown("Ce rapport résume les raisons de l'acceptation ou non du client dont l'id à été rentré.")
-    st.markdown("Pour en faciliter l'interprétation, la liste des premières features et leur importance est affiché en premier ainsi que leur effet.")
-    st.markdown("Viennent ensuite les diférents graphiques s'affichant par ordre d'importance, et présentant chacun le client en comparaison au groupe des clients acceptés vs les clients refusés.")
-    st.markdown("Enfin, à la droite de chaque graphique, est donné l'importance de cette variable, c'est à dire son influence sur le résultat final, ainsi que son effet (positif s'il fait tendre le client vers le fait d'être accepté ou à l'inverse si c'est négatif), ainsi qu'une indication sur une évolution de cette valeur qui permetrait au client d'être accepté si ce n'est pas déjà le cas.")
+    st.markdown("Ce rapport résume les raisons de l'acceptation ou du refus du client dont l'identifiant a été saisi.")
+    st.markdown("Pour faciliter son interprétation, la liste des premières caractéristiques les plus influentes sur ce choix est affichée en premier, ainsi que leur effet.")
+    st.markdown("Ensuite, les différents graphiques s'affichent par ordre d'importance, présentant chaque client par rapport au groupe des clients acceptés versus les clients refusés.")
+    st.markdown("Enfin, à droite de chaque graphique est indiquée l'importance de cette variable, c'est-à-dire son influence sur le résultat final, ainsi que son effet (positif s'il joue en sa faceur, négatif sinon). Une indication sur une éventuelle évolution de cette valeur est également fournie, suggérant que si cette évolution se produit, le client a plus de chance d'être accepté s'il ne l'est pas déjà.")
     
-    
+    # Affichage du waterfall de SHAP pour ce client
     st.header("Apercu des features")
-    #st.write(shap_df)
     st.image(shap_img, caption="Liste des features ayant eu le plus d'influence sur le choix final de l'algorythme, ainsi que si l'effet est positif ou négatif")
     
+    # Affichage des différentes visualisations des features par ordre d'importance
     st.header("Visualisation individuelle des features")
     
-    traduction = {
+    # Descritpion comprehenssible des features
+    descriptions = {
         'ACTIVE_AMT_CREDIT_SUM_LIMIT_SUM':"lkjlklklk",
         'AMT_CREDIT__AMT_GOODS_PRICE':"lkjlklklk",
         'EXT_SOURCE_MEAN': 'Moyenne des scores normalisés de 3 sources externes',
@@ -141,8 +149,6 @@ def run(dataset, client_line, shap_df, shap_img):
         'FLAG_PHONE': 'Le client as-t-il un téléphone?',
         'DAYS_BIRTH': 'Age (en jours)',
     }
-    
-    
     
     for name_col, dtype in [('AMT_CREDIT_r_AMT_INCOME_TOTAL', None),
                             ('EXT_SOURCE_MEAN', 'num_0'),
@@ -154,16 +160,22 @@ def run(dataset, client_line, shap_df, shap_img):
                             ('AMT_CREDIT__AMT_GOODS_PRICE', None),
                            ]:
     
-        # Création du module d'un graphique
+        # Création du module en deux partie des visualisations
         col1, col2 = st.columns([2, 1])
 
+        # Colonne de gauche
+        # Affichage de la feature traitée
+        col1.subheader("Visualisation de "+name_col)
+        col1.caption(descriptions[name_col])
+        
+        # Génération du graphique
         fig, ax = get_fig(name_col, dtype)
 
         # Ajout du graphique au module
-        col1.subheader("Visualisation de "+name_col)
-        col1.caption(traduction[name_col])
         col1.pyplot(fig)
 
+        # Colonne de doite
+        # Centrage
         col2.write(
         """<style>
         [data-testid="stHorizontalBlock"] {
@@ -173,7 +185,10 @@ def run(dataset, client_line, shap_df, shap_img):
         """,
         unsafe_allow_html=True)
         
+        # Récupération de la valeur SHAP liée à cette feature du client
         shap_value = get_importance(name_col, client_line[name_col])
+        
+        # Affichage de son influence
         col2.write(shap_value)
         
         if abs(shap_value)>0.15:
@@ -188,11 +203,5 @@ def run(dataset, client_line, shap_df, shap_img):
         else:
             col2.markdown("### Effet : :green[positif] :+1:")
         
-        col2.markdown("### Comment améliorer : Augmenter :arrow_up: :point_up_2: :chart_with_upwards_trend:")
-        col2.container()
-
-
-# This code allows you to run the app standalone
-# as well as part of a library of apps
-if __name__ == "__main__":
-    run()
+        #col2.markdown("### Comment améliorer : Augmenter :arrow_up: :point_up_2: :chart_with_upwards_trend:")
+        
