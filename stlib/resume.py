@@ -40,8 +40,8 @@ def run(dataset, client_line, shap_df, shap_img):
                 col2 = 'AMT_GOODS_PRICE'
                 
             
-            ax.scatter(dataset.loc[mask_t0, col1], dataset.loc[mask_t0, col2], s=1, c='g', label="Accepté") 
-            ax.scatter(dataset.loc[~mask_t0, col1], dataset.loc[~mask_t0, col2], s=1, c='r', label="Refusé")
+            ax.scatter(dataset.loc[mask_t0, col1], dataset.loc[mask_t0, col2], s=1, c=COLOR_A, label="Accepté") 
+            ax.scatter(dataset.loc[~mask_t0, col1], dataset.loc[~mask_t0, col2], s=1, c=COLOR_R, label="Refusé")
             
             ax.scatter(x=client_line[col1], y=client_line[col2], color='black', label='Client')
             
@@ -93,7 +93,7 @@ def run(dataset, client_line, shap_df, shap_img):
             ax.set_xlabel('Valeurs')
         
         if not skip_legend:
-            ax.axvline(x=client_line[name_col], color='black', linestyle='--', label='Client')
+            ax.axvline(x=client_line[name_col], color=COLOR_C, linestyle='--', label='Client')
             ax.legend()
         
         return fig, ax

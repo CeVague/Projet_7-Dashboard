@@ -17,6 +17,11 @@ from stlib import edit_client, resume, personalised_graph
 import requests
 
 # ------------- Chargement de variables et de données ---------------
+    
+# Palette de couleur
+COLOR_A = '#008bfb' # Accepté
+COLOR_R = '#ff0051' # Refusé
+COLOR_C = '#000000' # Client
 
 # Chargement des variables en fonction de l'environnement
 if os.environ.get('ENVIRONMENT') == 'local':

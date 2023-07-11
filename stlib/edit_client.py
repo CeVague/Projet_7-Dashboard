@@ -33,7 +33,7 @@ def run(dataset, client_line, shap_df, shap_img):
             return json_reponse
         else:
             st.error('Erreur lors de la prédiction')
-            
+    # Vérifie si une valeur (texte) est un float
     def is_float(v):
         try:
             f=float(v)
@@ -43,27 +43,28 @@ def run(dataset, client_line, shap_df, shap_img):
     
     resume_cat_col = load_resume_cat_col()
     
-    # Affichage
+    # Description de la page
     st.title(description)
     
     st.markdown("Cette page offre la possibilité de modifier les caractéristiques sur lesquelles le client a une influence afin de réaliser une simulation et de voir s'il pourrait être accepté s'il ne l'est pas déjà, ou s'il pourrait modifier certains termes de son contrat tout en restant éligible.")
     st.markdown("Il est important de noter que cette prédiction est une simulation et ne prend pas en compte les relations entre les différentes caractéristiques. Une véritable modification et simulation sont nécessaires pour valider définitivement ces changements.")
     
     with st.expander("Apercu des features"):
-        #st.write(shap_df)
         st.image(shap_img, caption="Liste des features ayant eu le plus d'influence sur le choix final de l'algorythme, ainsi que si l'effet est positif ou négatif")
     
     
     # On récupère la liste des features
     options = list(client_line.index)
-    # Et on retire toutes les OneHotEncoded pour ajouter les catégorielles
+    # Et on retire toutes les OneHotEncoded binaires pour ajouter les catégorielles
     options = [c for c in options if not c.startswith(tuple(resume_cat_col['start']))]
     options += list(resume_cat_col['simple'].unique())
 
     old_score = predict_client(client_line.squeeze())['result_proba']
+    
     option = st.selectbox("Feature à modifier", options)
     old_value = client_line[option]
-    st.text('Valeur d\'origine : '+str(old_value))
+    st.caption('Valeur d\'origine : '+str(old_value))
+    
     if option in list(resume_cat_col['simple']):
         ligne_option = resume_cat_col.loc[resume_cat_col['simple'] == option].iloc[0]
         start = ligne_option['start'] + '_'
