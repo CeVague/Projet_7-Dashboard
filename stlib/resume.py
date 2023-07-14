@@ -122,8 +122,8 @@ def run(dataset, client_line, shap_df, shap_img):
 
                 # Ajout de la catégorie 'Autre' s'il y en a trop
                 if len(not_categories) > 0:
-                    counts_t0.loc["Autre"] = counts_t0.loc[not_categories].sum()
-                    counts_not_t0.loc["Autre"] = counts_not_t0.loc[not_categories].sum()
+                    counts_t0.loc["Autre"] = counts_t0.loc[[c for c in not_categories if c in data_t0]].sum()
+                    counts_not_t0.loc["Autre"] = counts_not_t0.loc[[c for c in not_categories if c in data_not_t0]].sum()
 
                 # Si la valeur du client fait partie des masquées
                 if client in not_categories:
