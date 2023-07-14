@@ -285,7 +285,7 @@ def run(dataset, client_line, shap_df, shap_img):
     }
 
     # Features ayant besoin d'un passage au log
-    feat_log = {}
+    feat_log = {"EXT_SOURCE_MEAN": False}
 
     # Features utilisant un graphique alternatif
     feat_alt = {}
@@ -329,17 +329,17 @@ def run(dataset, client_line, shap_df, shap_img):
         fig, ax = plt.subplots(figsize=(10, 6))
         if feat_2 is None:
             val_client = client_line[[feat_1]]
-            alt = feat_log[feat_1] if feat_1 in feat_log else False
-            feat_1_log = feat_alt[feat_1] if feat_1 in feat_alt else False
+            alt = feat_alt[feat_1] if feat_1 in feat_alt else False
+            feat_1_log = feat_log[feat_1] if feat_1 in feat_log else True
 
             determine_best_chart(
                 dataset[[feat_1]], mask_t0, val_client, alt, [feat_1_log]
             )
         else:
             val_client = client_line[[feat_1, feat_2]]
-            alt = feat_log[feat_1] if feat_1 in feat_log else False
-            feat_1_log = feat_alt[feat_1] if feat_1 in feat_alt else False
-            feat_2_log = feat_alt[feat_1] if feat_2 in feat_alt else False
+            alt = feat_alt[feat_1] if feat_1 in feat_alt else False
+            feat_1_log = feat_log[feat_1] if feat_1 in feat_log else True
+            feat_2_log = feat_log[feat_1] if feat_2 in feat_log else True
 
             determine_best_chart(
                 dataset[[feat_1, feat_2]],
@@ -367,8 +367,6 @@ def run(dataset, client_line, shap_df, shap_img):
         shap_value = get_importance(nom_col, client_line[nom_col])
 
         # Affichage de son influence
-        col2.write(shap_value)
-
         if abs(shap_value) > 0.9:
             col2.markdown("### Importance : :red[primordiale]")
         elif abs(shap_value) > 0.15:
