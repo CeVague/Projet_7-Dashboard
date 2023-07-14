@@ -272,7 +272,8 @@ def run(dataset, client_line, shap_df, shap_img):
 
     # Descritpion comprehenssible des features
     descriptions = {
-        "ACTIVE_AMT_CREDIT_SUM_LIMIT_SUM": "lkjlklklk",
+        "PAYMENT_RATE": "Ratio entre le cout à payer chaque année par le client et le cout total du crédit",
+        "ANNUITY_INCOME_PERC": "Pourcentage que représente le prix du crédit par rapport à ses revenus",
         "AMT_CREDIT__AMT_GOODS_PRICE": "Différence entre le cout du crédit et le prix du produit",
         "AMT_GOODS_PRICE": "Prix du produit acheté",
         "EXT_SOURCE_MEAN": "Moyenne des scores normalisés de 3 sources externes",
@@ -282,17 +283,45 @@ def run(dataset, client_line, shap_df, shap_img):
         "PREV_NAME_SELLER_INDUSTRY_MEDIAN": "Domaine d'industrie le plus fréquent des précédents vendeurs",
         "FLAG_PHONE": "Le client a-t-il un téléphone?",
         "DAYS_BIRTH": "Nombre de jours entre aujourd'hui et la naissance du client",
+        "NAME_EDUCATION_TYPE_Highereducation": "Le client a-t-il un diplome d'études supérieur",
+        "REGION_RATING_CLIENT_W_CITY": "Notation de la région du client en prenant en compte sa ville",
+        "REGION_RATING_CLIENT": "Notation de la région du client",
+        "INSTAL_AMT_PAYMENT_SUM": "Ce que le client a réellement payé sur le crédit précédent pour ce versement",
+        "AMT_CREDIT_r_AMT_GOODS_PRICE": "Ratio entre le cout du crédit et le prix du produit",
+        "INSTAL_PAYMENT_DIFF_MEAN": "Moyenne des différences entre le cout de ses précédents crédits",
     }
 
     # Features ayant besoin d'un passage au log
-    feat_log = {"EXT_SOURCE_MEAN": False}
+    feat_log = {
+        "EXT_SOURCE_MEAN": False,
+        "INSTAL_PAYMENT_DIFF_MEAN":True,
+        "APPROVED_AMT_GOODS_PRICE_MIN":True,
+        "POS_MONTHS_BALANCE_MAX":True,
+        "PREV_APP_CREDIT_PERC_MEAN": True,
+        "CLOSED_AMT_CREDIT_SUM_MAX":True,
+        "INSTAL_AMT_PAYMENT_MAX":True,
+        "INSTAL_AMT_PAYMENT_MIN":True,
+        "APPROVED_AMT_DOWN_PAYMENT_MAX":True,
+        "INSTAL_COUNT":True,
+        "BURO_AMT_CREDIT_SUM_DEBT_MAX":True,
+        "INCOME_PER_PERSON": True,
+        "ACTIVE_DAYS_CREDIT_ENDDATE_MEAN": True,
+        "PREV_AMT_ANNUITY_MAX": True,
+        "ACTIVE_AMT_CREDIT_SUM_LIMIT_MEAN": True,
+        "INSTAL_AMT_PAYMENT_SUM":True,
+    }
 
     # Features utilisant un graphique alternatif
-    feat_alt = {}
+    feat_alt = {
+        "EXT_SOURCE_MEAN":True,
+        "DAYS_BIRTH": True,
+    }
 
     # Features à combiner
     feat_join = {
-        "AMT_CREDIT__AMT_GOODS_PRICE": ("AMT_CREDIT", "AMT_GOODS_PRICE"),
+        "AMT_CREDIT_r_AMT_GOODS_PRICE": ("AMT_CREDIT", "AMT_GOODS_PRICE"),
+        "PAYMENT_RATE": ("AMT_ANNUITY", "AMT_CREDIT"),
+        "ANNUITY_INCOME_PERC": ("AMT_ANNUITY", "AMT_INCOME_TOTAL"),
     }
 
     # On liste les features que l'on souhaite afficher
@@ -330,7 +359,7 @@ def run(dataset, client_line, shap_df, shap_img):
         if feat_2 is None:
             val_client = client_line[[feat_1]]
             alt = feat_alt[feat_1] if feat_1 in feat_alt else False
-            feat_1_log = feat_log[feat_1] if feat_1 in feat_log else True
+            feat_1_log = feat_log[feat_1] if feat_1 in feat_log else False
 
             determine_best_chart(
                 dataset[[feat_1]], mask_t0, val_client, alt, [feat_1_log]
@@ -338,8 +367,8 @@ def run(dataset, client_line, shap_df, shap_img):
         else:
             val_client = client_line[[feat_1, feat_2]]
             alt = feat_alt[feat_1] if feat_1 in feat_alt else False
-            feat_1_log = feat_log[feat_1] if feat_1 in feat_log else True
-            feat_2_log = feat_log[feat_1] if feat_2 in feat_log else True
+            feat_1_log = feat_log[feat_1] if feat_1 in feat_log else False
+            feat_2_log = feat_log[feat_1] if feat_2 in feat_log else False
 
             determine_best_chart(
                 dataset[[feat_1, feat_2]],
