@@ -72,7 +72,9 @@ def run(dataset, client_line, shap_df, shap_img):
 
     # On affiche la liste des features et on récupère la valeur d'origine
     # de celle selectionnée
-    option = st.selectbox("Feature à modifier", options, index=options.index("AMT_CREDIT"))
+    option = st.selectbox(
+        "Feature à modifier", options, index=options.index("AMT_CREDIT")
+    )
     old_value = client_line[option]
     st.caption("Valeur d'origine : " + str(old_value))
 

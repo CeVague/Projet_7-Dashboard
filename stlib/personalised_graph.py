@@ -118,8 +118,12 @@ def run(dataset, client_line, shap_df, shap_img):
 
                 # Ajout de la catégorie 'Autre' s'il y en a trop
                 if len(not_categories) > 0:
-                    counts_t0.loc["Autre"] = counts_t0.loc[[c for c in not_categories if c in data_t0]].sum()
-                    counts_not_t0.loc["Autre"] = counts_not_t0.loc[[c for c in not_categories if c in data_not_t0]].sum()
+                    counts_t0.loc["Autre"] = counts_t0.loc[
+                        [c for c in not_categories if c in data_t0]
+                    ].sum()
+                    counts_not_t0.loc["Autre"] = counts_not_t0.loc[
+                        [c for c in not_categories if c in data_not_t0]
+                    ].sum()
 
                 # Si la valeur du client fait partie des masquées
                 if client in not_categories:
@@ -240,7 +244,7 @@ def run(dataset, client_line, shap_df, shap_img):
             feat_1 = st.selectbox(
                 "Première colonne à visualiser",
                 list_cols,
-                index=list_cols.index("EXT_SOURCE_MEAN")
+                index=list_cols.index("EXT_SOURCE_MEAN"),
             )
             feat_1_log = st.checkbox("Axe 1 en log ?")
         with col2:

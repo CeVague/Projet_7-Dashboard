@@ -122,8 +122,12 @@ def run(dataset, client_line, shap_df, shap_img):
 
                 # Ajout de la catégorie 'Autre' s'il y en a trop
                 if len(not_categories) > 0:
-                    counts_t0.loc["Autre"] = counts_t0.loc[[c for c in not_categories if c in data_t0]].sum()
-                    counts_not_t0.loc["Autre"] = counts_not_t0.loc[[c for c in not_categories if c in data_not_t0]].sum()
+                    counts_t0.loc["Autre"] = counts_t0.loc[
+                        [c for c in not_categories if c in data_t0]
+                    ].sum()
+                    counts_not_t0.loc["Autre"] = counts_not_t0.loc[
+                        [c for c in not_categories if c in data_not_t0]
+                    ].sum()
 
                 # Si la valeur du client fait partie des masquées
                 if client in not_categories:
@@ -294,26 +298,26 @@ def run(dataset, client_line, shap_df, shap_img):
     # Features ayant besoin d'un passage au log
     feat_log = {
         "EXT_SOURCE_MEAN": False,
-        "INSTAL_PAYMENT_DIFF_MEAN":True,
-        "APPROVED_AMT_GOODS_PRICE_MIN":True,
-        "POS_MONTHS_BALANCE_MAX":True,
+        "INSTAL_PAYMENT_DIFF_MEAN": True,
+        "APPROVED_AMT_GOODS_PRICE_MIN": True,
+        "POS_MONTHS_BALANCE_MAX": True,
         "PREV_APP_CREDIT_PERC_MEAN": True,
-        "CLOSED_AMT_CREDIT_SUM_MAX":True,
-        "INSTAL_AMT_PAYMENT_MAX":True,
-        "INSTAL_AMT_PAYMENT_MIN":True,
-        "APPROVED_AMT_DOWN_PAYMENT_MAX":True,
-        "INSTAL_COUNT":True,
-        "BURO_AMT_CREDIT_SUM_DEBT_MAX":True,
+        "CLOSED_AMT_CREDIT_SUM_MAX": True,
+        "INSTAL_AMT_PAYMENT_MAX": True,
+        "INSTAL_AMT_PAYMENT_MIN": True,
+        "APPROVED_AMT_DOWN_PAYMENT_MAX": True,
+        "INSTAL_COUNT": True,
+        "BURO_AMT_CREDIT_SUM_DEBT_MAX": True,
         "INCOME_PER_PERSON": True,
         "ACTIVE_DAYS_CREDIT_ENDDATE_MEAN": True,
         "PREV_AMT_ANNUITY_MAX": True,
         "ACTIVE_AMT_CREDIT_SUM_LIMIT_MEAN": True,
-        "INSTAL_AMT_PAYMENT_SUM":True,
+        "INSTAL_AMT_PAYMENT_SUM": True,
     }
 
     # Features utilisant un graphique alternatif
     feat_alt = {
-        "EXT_SOURCE_MEAN":True,
+        "EXT_SOURCE_MEAN": True,
         "DAYS_BIRTH": True,
     }
 
