@@ -276,6 +276,15 @@ def run(dataset, client_line, shap_df, shap_img):
 
     # Descritpion comprehenssible des features
     descriptions = {
+        "FLAG_WORK_PHONE": "Le client a-t-il un téléphone professionnel ?",
+        "NAME_INCOME_TYPE_Working": "La source de revenus du client est-il le travail salarié ?",
+        "AMT_ANNUITY": "Prix à payer chaque année par le client", 
+        "YEARS_BEGINEXPLUATATION_MEDI": "Le client a-t-il commencé à utiliser son logement (médiane)",
+        "INSTAL_DAYS_ENTRY_PAYMENT_MAX": "Temps (en jours) depuis laquelle la dernière mensualité de prêt à été payées",
+        "EXT_SOURCE_MEAN_x_DAYS_EMPLOYED": "Salaire annuel moyen * nombre de jours employés",
+        "AMT_CREDIT_r_AMT_ANNUITY": "Ratio entre le prix du crédit et le prix à payer chaque année",
+        "OCCUPATION_TYPE_Laborers": "Travail actuel : Ouvrier",
+        "INSTAL_DPD_MEAN": "Moyenne du temps d'écart entre la date des échéances du précédent crédit et les dates de paiement constatés",
         "PAYMENT_RATE": "Ratio entre le cout à payer chaque année par le client et le cout total du crédit",
         "ANNUITY_INCOME_PERC": "Pourcentage que représente le prix du crédit par rapport à ses revenus",
         "AMT_CREDIT__AMT_GOODS_PRICE": "Différence entre le cout du crédit et le prix du produit",
@@ -313,6 +322,7 @@ def run(dataset, client_line, shap_df, shap_img):
         "PREV_AMT_ANNUITY_MAX": True,
         "ACTIVE_AMT_CREDIT_SUM_LIMIT_MEAN": True,
         "INSTAL_AMT_PAYMENT_SUM": True,
+        "INSTAL_DPD_MEAN": True,
     }
 
     # Features utilisant un graphique alternatif
@@ -326,6 +336,7 @@ def run(dataset, client_line, shap_df, shap_img):
         "AMT_CREDIT_r_AMT_GOODS_PRICE": ("AMT_CREDIT", "AMT_GOODS_PRICE"),
         "PAYMENT_RATE": ("AMT_ANNUITY", "AMT_CREDIT"),
         "ANNUITY_INCOME_PERC": ("AMT_ANNUITY", "AMT_INCOME_TOTAL"),
+        "AMT_CREDIT_r_AMT_ANNUITY": ("AMT_CREDIT", "AMT_ANNUITY"),
     }
 
     # On liste les features que l'on souhaite afficher
